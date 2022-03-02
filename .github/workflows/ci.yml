@@ -23,3 +23,15 @@ jobs:
       uses: codecov/codecov-action@v2
       with:
           token: ${{ secrets.CODECOV_TOKEN }}
+    - name: SonarCloud Scan
+      uses: sonarsource/sonarcloud-github-action@master
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      with:
+        sonar.organization: DimaKoroliov
+        sonar.projectKey: PersistedValue
+        sonar.sources: Sources/
+        sonar.test.exclusions: Tests/**
+        sonar.tests: Tests/
+        sonar.verbose: true
