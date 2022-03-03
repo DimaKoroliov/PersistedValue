@@ -272,6 +272,29 @@ final class PersistedValueTests: XCTestCase {
         _ = sut.wrappedValue
         XCTAssertEqual(stream.inputs.dropFirst(), ["prefix: get value: (1)"])
     }
+
+    func testAtomic() {
+        let sut = self.storage.persistedValue(forKey: key)
+            .integer(Int.self)
+            .default(0)
+            .atomic()
+
+        var extectations: [XCTestExpectation] = []
+        var sum = 0
+        for i in 0...1000 {
+            sum += i
+            let exp = expectation(description: "\(i)")
+            extectations.append(exp)
+            DispatchQueue.global().async {
+                sut.mutate { $0 += i }
+                exp.fulfill()
+            }
+        }
+
+        wait(for: extectations, timeout: 1)
+
+        XCTAssertEqual(sut.wrappedValue, sum)
+    }
 }
 
 struct Model: Codable, Equatable {
