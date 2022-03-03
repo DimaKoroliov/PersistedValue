@@ -3,7 +3,7 @@ import Combine
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
 public extension PersistedValue {
 
-    func subject<P>(didChage: P) -> PersistedValues.Subject<Self> where P: Publisher, P.Output == Void {
+    func subject<P>(didChage: P? = nil) -> PersistedValues.Subject<Self> where P: Publisher, P.Output == Void {
         .init(upstream: self, didChage: didChage)
     }
 }
@@ -25,21 +25,27 @@ extension PersistedValues {
 
             set {
                 self.upstream.wrappedValue = newValue
-//                self.subject.send(newValue)
+                self.didSet.send(newValue)
             }
         }
 
         private let upstream: Upstream
-        private let subject: PassthroughSubject<Value, Never> = .init()
+        private let subject: PassthroughSubject<Value, Never>
+        private let didSet = PassthroughSubject<Value, Never>()
         private var cancellable: Cancellable?
 
-        init<P>(upstream: Upstream, didChage: P) where P: Publisher, P.Output == Void {
+        init<P>(upstream: Upstream, didChage: P?) where P: Publisher, P.Output == Void {
             self.upstream = upstream
 
-            cancellable = didChage
-                .catch { _ in Empty() }
-                .map { upstream.wrappedValue }
-                .subscribe(self.subject)
+            if let didChage = didChage {
+                self.subject = .init()
+                self.cancellable = didChage
+                    .catch { _ in Empty() }
+                    .map { upstream.wrappedValue }
+                    .subscribe(self.subject)
+            } else {
+                self.subject = self.didSet
+            }
         }
 
         public func send(_ value: Value) {
