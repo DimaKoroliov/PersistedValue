@@ -328,6 +328,42 @@ final class PersistedValueTests: XCTestCase {
 
         XCTAssertEqual(sut.wrappedValue, sum)
     }
+
+    @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
+    func testSubject() {
+        let sut = self.storage.persistedValue(forKey: key)
+            .integer(Int.self)
+            .default(0)
+            .subject()
+
+        var values: [Int] = []
+        let cancellable = sut.sink { values.append($0) }
+
+        XCTAssertEqual(values, [0])
+
+        sut.wrappedValue = 2
+        XCTAssertEqual(values, [0, 2])
+    }
+
+    @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
+    func testSubjectWhenDidChange() {
+        let didChage = PassthroughSubject<Void, Never>()
+        let sut = self.storage.persistedValue(forKey: key)
+            .integer(Int.self)
+            .default(0)
+            .subject(didChage: didChage)
+
+        var values: [Int] = []
+        let cancellable = sut.sink { values.append($0) }
+
+        XCTAssertEqual(values, [0])
+
+        sut.wrappedValue = 2
+        XCTAssertEqual(values, [0])
+
+        didChage.send()
+        XCTAssertEqual(values, [0, 2])
+    }
 }
 
 struct Model: Codable, Equatable {
