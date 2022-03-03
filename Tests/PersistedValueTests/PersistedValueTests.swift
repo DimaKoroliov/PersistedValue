@@ -244,9 +244,45 @@ final class PersistedValueTests: XCTestCase {
         opt.wrappedValue = nil
         XCTAssertEqual(value.wrappedValue?.opt, nil)
     }
+
+    func testPrint() {
+        let stream = OutputStream()
+        let sut = self.storage.persistedValue(forKey: key)
+            .integer(Int.self)
+            .default(0)
+            .print(to: stream)
+
+        sut.wrappedValue = 1
+        XCTAssertEqual(stream.inputs, ["set value: (1)"])
+
+        _ = sut.wrappedValue
+        XCTAssertEqual(stream.inputs.dropFirst(), ["get value: (1)"])
+    }
+
+    func testPrintWithPrefix() {
+        let stream = OutputStream()
+        let sut = self.storage.persistedValue(forKey: key)
+            .integer(Int.self)
+            .default(0)
+            .print("prefix", to: stream)
+
+        sut.wrappedValue = 1
+        XCTAssertEqual(stream.inputs, ["prefix: set value: (1)"])
+
+        _ = sut.wrappedValue
+        XCTAssertEqual(stream.inputs.dropFirst(), ["prefix: get value: (1)"])
+    }
 }
 
 struct Model: Codable, Equatable {
     var str: String = ""
     var opt: String?
+}
+
+final class OutputStream: TextOutputStream {
+    private(set) var inputs: [String] = []
+
+    func write(_ string: String) {
+        inputs.append(string)
+    }
 }
