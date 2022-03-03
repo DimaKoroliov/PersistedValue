@@ -198,6 +198,39 @@ final class PersistedValueTests: XCTestCase {
         XCTAssertEqual(self.storage.values[key2], str2.data(using: .utf8))
     }
 
+    func testMergeWhenNonOptional() {
+        let pv1 = self.storage.persistedValue(forKey: key)
+            .string()
+            .default("")
+
+        let key2 = "key2"
+        let pv2 = self.storage.persistedValue(forKey: key2)
+            .string()
+
+        let merge = pv1.merge(with: pv2)
+
+        XCTAssertEqual(merge.wrappedValue, "")
+        XCTAssertEqual(self.storage.gets[key], 2)
+        XCTAssertEqual(self.storage.gets[key2], 1)
+
+        let str = "1"
+        pv1.wrappedValue = str
+        XCTAssertEqual(merge.wrappedValue, str)
+        XCTAssertEqual(self.storage.gets[key], 3)
+        XCTAssertEqual(self.storage.gets[key2], 2)
+        XCTAssertEqual(self.storage.sets[key], 1)
+        XCTAssertEqual(self.storage.sets[key2], nil)
+
+        let str2 = "2"
+        merge.wrappedValue = str2
+        XCTAssertEqual(pv1.wrappedValue, str2)
+        XCTAssertEqual(pv2.wrappedValue, str2)
+        XCTAssertEqual(self.storage.sets[key], 2)
+        XCTAssertEqual(self.storage.sets[key2], 1)
+        XCTAssertEqual(self.storage.values[key], str2.data(using: .utf8))
+        XCTAssertEqual(self.storage.values[key2], str2.data(using: .utf8))
+    }
+
     func testDynamicMemberLookup() {
         let str = self.storage.persistedValue(forKey: key)
             .codable(Model.self)

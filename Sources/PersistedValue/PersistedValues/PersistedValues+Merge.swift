@@ -10,7 +10,7 @@ public extension PersistedValue {
 
     func merge<U>(
         with persistedValue: U,
-        merge: @escaping (Value, Value) -> Value = { $1 }
+        merge: @escaping (Value, Value?) -> Value = { value, _ in value }
     ) -> PersistedValues.Merge<Self, AnyPersistedValue<Value>> where U: PersistedValue, U.Value == Value? {
         .init(self, persistedValue.default(self.wrappedValue).eraseToAnyPersistedValue()) {
             merge($0, $1)
