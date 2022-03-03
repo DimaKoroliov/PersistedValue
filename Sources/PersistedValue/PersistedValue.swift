@@ -1,5 +1,6 @@
 import Foundation
 
+@dynamicMemberLookup
 public protocol PersistedValue {
     associatedtype Value
 
@@ -13,5 +14,12 @@ public extension PersistedValue {
 
     func mutate(_ transform: (inout Value) -> ()) {
         transform(&wrappedValue)
+    }
+
+    subscript<Subject>(dynamicMember keyPath: WritableKeyPath<Value, Subject>) -> AnyPersistedValue<Subject> {
+        .init(
+            get: { self.wrappedValue[keyPath: keyPath] },
+            set: { self.wrappedValue[keyPath: keyPath] = $0 }
+        )
     }
 }
