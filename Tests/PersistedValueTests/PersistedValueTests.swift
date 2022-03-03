@@ -197,8 +197,56 @@ final class PersistedValueTests: XCTestCase {
         XCTAssertEqual(self.storage.values[key], str2.data(using: .utf8))
         XCTAssertEqual(self.storage.values[key2], str2.data(using: .utf8))
     }
+
+    func testDynamicMemberLookup() {
+        let str = self.storage.persistedValue(forKey: key)
+            .codable(Model.self)
+            .default(.init())
+            .str
+
+        let value = self.storage.persistedValue(forKey: key).codable(Model.self)
+
+        str.wrappedValue = "123"
+        XCTAssertEqual(value.wrappedValue?.str, "123")
+
+        let opt = self.storage.persistedValue(forKey: key)
+            .codable(Model.self)
+            .opt
+
+        opt.wrappedValue = "123"
+        XCTAssertEqual(value.wrappedValue?.opt, "123")
+
+        opt.wrappedValue = nil
+        XCTAssertEqual(value.wrappedValue?.opt, nil)
+    }
+
+    func testDynamicMemberLookupWhenOptional() {
+        self.storage.persistedValue(forKey: key).codable(Model.self).wrappedValue = .init()
+        let str = self.storage.persistedValue(forKey: key)
+            .codable(Model.self)
+            .str
+
+        let value = self.storage.persistedValue(forKey: key).codable(Model.self)
+
+        str.wrappedValue = "123"
+        XCTAssertEqual(value.wrappedValue?.str, "123")
+
+        str.wrappedValue = nil
+        XCTAssertEqual(value.wrappedValue?.str, "123")
+
+        let opt = self.storage.persistedValue(forKey: key)
+            .codable(Model.self)
+            .opt
+
+        opt.wrappedValue = "123"
+        XCTAssertEqual(value.wrappedValue?.opt, "123")
+
+        opt.wrappedValue = nil
+        XCTAssertEqual(value.wrappedValue?.opt, nil)
+    }
 }
 
-private struct Model: Codable, Equatable {
-    let str: String
+struct Model: Codable, Equatable {
+    var str: String = ""
+    var opt: String?
 }
