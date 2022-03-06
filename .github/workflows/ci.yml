@@ -9,10 +9,13 @@ on:
 jobs:
   build:
 
-    runs-on: macos-latest
+    runs-on: macos-11
 
     steps:
     - uses: actions/checkout@v2
+    - uses: actions/setup-java@v1
+      with:
+        java-version: '11'
     - name: Build
       run: swift build -v
     - name: Run tests
@@ -23,3 +26,10 @@ jobs:
       uses: codecov/codecov-action@v2
       with:
           token: ${{ secrets.CODECOV_TOKEN }}
+    - name: Sounar Cloud
+      run: |
+        brew install sonar-scanner
+        sonar-scanner -Dsonar.login=${{ secrets.SONAR_TOKEN }} -Dsonar.host.url=https://sonarcloud.io -Dsonar.organization=dimakoroliov -Dsonar.projectKey=PersistedValue -Dsonar.sources=./Sources/PersistedValue
+        # xcrun llvm-cov export -format="lcov" .build/debug/PersistedValuePackageTests.xctest/Contents/MacOS/PersistedValuePackageTests -instr-profile .build/debug/codecov/default.profdata > Coverage.report
+      env:
+        GITHUB_TOKEN: ${{ secrets.GIT_HUB_TOKEN }}
