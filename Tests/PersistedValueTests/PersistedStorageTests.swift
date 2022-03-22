@@ -9,26 +9,29 @@ import PersistedValueTestingUtilities
 final class PersistedStorageTests: XCTestCase {
 
     private let key = "key"
+    private var cancellable: Cancellable?
 
-    @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
+    override func tearDown() {
+        self.cancellable = nil
+    }
+
     func testDidChangeDefault() {
         let storage = Storage()
         var valuesCount = 0
         var completionsCount = 0
-        _ = storage.didChange(forKey: key)
+        self.cancellable = storage.didChange(forKey: key)
             .sink(receiveCompletion: { _ in completionsCount += 1 }, receiveValue: { valuesCount += 1 })
 
         XCTAssertEqual(valuesCount, 0)
         XCTAssertEqual(completionsCount, 1)
     }
 
-    @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
     func testPersistedSubjectData() {
         let storage = MockPersistedStorage()
         let value = storage.persistedSubject(forKey: key)
 
         var values: [Data?] = []
-        let cancellable = value.sink { values.append($0) }
+        self.cancellable = value.sink { values.append($0) }
 
         XCTAssertEqual(values, [nil])
 
@@ -40,13 +43,12 @@ final class PersistedStorageTests: XCTestCase {
         XCTAssertEqual(values, [nil, data])
     }
 
-    @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
     func testPersistedSubject() {
         let storage = MockPersistedStorage()
         let value = storage.persistedSubject(forKey: key) { $0.string().default("") }
 
         var values: [String] = []
-        let cancellable = value.sink { values.append($0) }
+        self.cancellable = value.sink { values.append($0) }
 
         XCTAssertEqual(values, [""])
 

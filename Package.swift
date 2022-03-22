@@ -25,5 +25,8 @@ let package = Package(
         .testTarget(
             name: "PersistedValueTests",
             dependencies: ["PersistedValue", "PersistedValueTestingUtilities"]),
+        .testTarget(
+            name: "PersistedValueTestingUtilitiesTests",
+            dependencies: ["PersistedValue", "PersistedValueTestingUtilities"]),
     ]
 )
