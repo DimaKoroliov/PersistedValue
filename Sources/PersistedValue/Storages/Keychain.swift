@@ -62,6 +62,12 @@ public final class KeychainStorage: PersistedStorage {
     }
 
     private func set(_ value: Data?, forKey key: String) {
+        defer {
+            if #available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *) {
+                didChangeSubject.send(key)
+            }
+        }
+
         let containsValue = data(forKey: key) != nil
         guard let value = value else {
             if containsValue {
@@ -75,10 +81,6 @@ public final class KeychainStorage: PersistedStorage {
             self.update(value, forKey: key)
         } else {
             self.add(value, forKey: key)
-        }
-
-        if #available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *) {
-            didChangeSubject.send(key)
         }
     }
 

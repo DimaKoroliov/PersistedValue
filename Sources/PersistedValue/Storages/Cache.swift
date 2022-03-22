@@ -47,9 +47,10 @@ public struct CachePersistedStorage: PersistedStorage {
                     return
                 }
 
+                let isNewValue = self.storage.object(forKey: nskey) == nil
                 self.storage.setObject(.init(key: nskey, data: data as NSData), forKey: nskey)
                 
-                if #available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *) {
+                if #available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *), isNewValue {
                     didChangeSubject.send(key)
                 }
             }
