@@ -6,6 +6,7 @@ import XCTest
 @testable import PersistedValue
 import PersistedValueTestingUtilities
 
+@available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
 final class PersistedStorageTests: XCTestCase {
 
     private let key = "key"

@@ -5,10 +5,12 @@ import XCTest
 
 @testable import PersistedValue
 
+@available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
 final class StoragesTests: XCTestCase {
 
     private let key = "key"
     private let key2 = "key2"
+
     private var cancellable: Cancellable?
 
     override func tearDown() {
