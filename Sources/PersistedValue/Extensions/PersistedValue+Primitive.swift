@@ -16,4 +16,11 @@ public extension PersistedValue where Value == Data? {
                 untransform: { $0.flatMap { "\($0)" } }
             )
     }
+
+    func bool() -> PersistedValues.Map<Self, Bool?> {
+        self.map(
+            transform: { $0.map { $0.first == 1 } },
+            untransform: { $0.map { Data($0 ? [1] : []) } }
+        )
+    }
 }

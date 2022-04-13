@@ -76,6 +76,23 @@ final class PersistedValueTests: XCTestCase {
         XCTAssertEqual(self.storage.values[key], "\(int)".data(using: .utf8))
     }
 
+    func testBool() {
+        let persistedValue = self.storage.persistedValue(forKey: key)
+            .bool()
+
+        var bool = true
+        persistedValue.wrappedValue = bool
+
+        XCTAssertEqual(persistedValue.wrappedValue, bool)
+        XCTAssertEqual(self.storage.values[key], Data([1]))
+
+        bool = false
+        persistedValue.wrappedValue = bool
+
+        XCTAssertEqual(persistedValue.wrappedValue, bool)
+        XCTAssertEqual(self.storage.values[key], Data([]))
+    }
+
     func testDefault() {
         let initial = "1"
         let persistedValue = self.storage.persistedValue(forKey: key)
