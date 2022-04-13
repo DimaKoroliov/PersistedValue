@@ -3,11 +3,11 @@ import Combine
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
 public extension PersistedValue {
 
-    func subject<P>(didChage: P) -> PersistedValues.Subject<Self> where P: Publisher, P.Output == Void, P.Failure == Never {
+    func subject<P>(didChage: P) -> PersistedValues.Subject<Value> where P: Publisher, P.Output == Void, P.Failure == Never {
         .init(upstream: self, didChage: didChage)
     }
 
-    func subject() -> PersistedValues.Subject<Self> {
+    func subject() -> PersistedValues.Subject<Value> {
         .init(upstream: self, didChage: Empty())
     }
 }
@@ -16,9 +16,8 @@ public extension PersistedValue {
 @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
 extension PersistedValues {
 
-    public final class Subject<Upstream>: PersistedValue, Combine.Subject where Upstream: PersistedValue {
+    public final class Subject<Value>: PersistedValue, Combine.Subject {
 
-        public typealias Value = Upstream.Value
         public typealias Output = Value
         public typealias Failure = Never
 
@@ -33,13 +32,16 @@ extension PersistedValues {
             }
         }
 
-        private let upstream: Upstream
+        private let upstream: AnyPersistedValue<Value>
         private let subject: PassthroughSubject<Value, Never>
         private let didSet = PassthroughSubject<Value, Never>()
         private var cancellable: Cancellable?
 
-        init<P>(upstream: Upstream, didChage: P) where P: Publisher, P.Output == Void, P.Failure == Never {
-            self.upstream = upstream
+        init<Upstream, P>(
+          upstream: Upstream,
+          didChage: P
+        ) where P: Publisher, P.Output == Void, P.Failure == Never, Upstream: PersistedValue, Upstream.Value == Value {
+          self.upstream = upstream.eraseToAnyPersistedValue()
 
             if didChage is Empty<Void, Never> {
                 self.subject = self.didSet

@@ -18,11 +18,11 @@ public extension PersistedStorage {
     func persistedSubject<V>(
         forKey key: String,
         make: (AnyPersistedValue<Data?>) -> V
-    ) -> PersistedValues.Subject<V> where V: PersistedValue {
+    ) -> PersistedValues.Subject<V.Value> where V: PersistedValue {
         make(persistedValue(forKey: key)).subject(didChage: didChange(forKey: key))
     }
 
-    func persistedSubject(forKey key: String) -> PersistedValues.Subject<AnyPersistedValue<Data?>> {
+    func persistedSubject(forKey key: String) -> PersistedValues.Subject<Data?> {
         persistedValue(forKey: key).subject(didChage: didChange(forKey: key))
     }
 }
